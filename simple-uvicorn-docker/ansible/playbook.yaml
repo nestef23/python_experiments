@@ -89,3 +89,18 @@
         state: present
         build: always         # Always rebuild the image
         recreate: auto       # Only recreate containers if needed
+        
+    - name: Wait for the app to become available
+      uri:
+        url: "http://{{ inventory_hostname }}:8000/"
+        method: GET
+        return_content: yes
+        status_code: 200
+      register: web_response
+      retries: 5
+      delay: 3
+      until: web_response.status == 200
+
+    - name: Show the web page content
+      debug:
+        msg: "{{ web_response.content }}"
